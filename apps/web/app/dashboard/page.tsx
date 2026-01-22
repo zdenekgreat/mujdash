@@ -10,6 +10,14 @@ import { z } from "zod";
 import { trpc } from "@/lib/trpc";
 import { Loader2, RefreshCw } from "lucide-react";
 
+// Definice typu pro uživatele pro TypeScript (vyřeší chybu při buildu)
+interface DbUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt?: Date | string;
+}
+
 const formSchema = z.object({
   username: z.string().min(2, "Jméno je moc krátké"),
   email: z.string().email("Neplatný email"),
@@ -18,13 +26,13 @@ const formSchema = z.object({
 export default function DashboardPage() {
   const utils = trpc.useUtils();
   
-  // Dotaz na data
+  // Načítání dat přes tRPC
   const { data: users, isLoading, isFetching } = trpc.getUsers.useQuery();
 
-  // Funkce pro zápis
+  // Mutace pro zápis do databáze
   const createUser = trpc.createUser.useMutation({
     onSuccess: () => {
-      utils.getUsers.invalidate(); // Zneplatní stará data a načte nová
+      utils.getUsers.invalidate(); 
       form.reset();
     },
   });
@@ -49,7 +57,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
-        {/* FORMULÁŘ */}
+        {/* FORMULÁŘ PRO PŘIDÁVÁNÍ */}
         <Card className="lg:col-span-2 shadow-sm border-border/60">
           <CardHeader>
             <CardTitle>Napsat do PostgreSQL</CardTitle>
@@ -64,7 +72,9 @@ export default function DashboardPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Jméno</FormLabel>
-                        <FormControl><Input placeholder="Pavel Novotný" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="Pavel Novotný" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -75,7 +85,9 @@ export default function DashboardPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>E-mail</FormLabel>
-                        <FormControl><Input placeholder="pavel@firma.cz" {...field} /></FormControl>
+                        <FormControl>
+                          <Input placeholder="pavel@firma.cz" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -83,30 +95,37 @@ export default function DashboardPage() {
                 </div>
                 <Button type="submit" disabled={createUser.isPending} className="w-full md:w-auto px-8">
                   {createUser.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Uložit navždy
+                  Uložit do cloudu
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
 
-        {/* LIST */}
+        {/* SEZNAM UŽIVATELŮ NAČTENÝCH Z DB */}
         <Card className="shadow-sm border-border/60">
           <CardHeader>
-            <CardTitle>Data z Cloudu</CardTitle>
+            <CardTitle>Data z Neon.tech</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
+              <div className="flex justify-center p-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
             ) : (
               <div className="space-y-4">
-                {users?.map((u) => (
+                {/* FIX: Přidán typ (u: DbUser) pro úspěšný build */}
+                {users?.map((u: DbUser) => (
                   <div key={u.id} className="flex flex-col border-b pb-2 last:border-0">
                     <span className="font-bold text-sm">{u.name}</span>
                     <span className="text-xs text-muted-foreground">{u.email}</span>
                   </div>
                 ))}
-                {users?.length === 0 && <p className="text-sm italic text-center text-muted-foreground">V DB zatím nikdo není.</p>}
+                {users?.length === 0 && (
+                  <p className="text-sm italic text-center text-muted-foreground">
+                    V databázi zatím nikdo není.
+                  </p>
+                )}
               </div>
             )}
           </CardContent>

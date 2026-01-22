@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file://C%3A/Users/HP/Desktop/JAM%20TEMPLATES%2026/DASHBOARD/my-enterprise-app/apps/web/apps/web/app/page.tsx"],"sourcesContent":["import { redirect } from \"next/navigation\";\r\n\r\nexport default function Home() {\r\n  // Okamžitě přesměruj na dashboard\r\n  redirect(\"/dashboard\");\r\n}"],"names":[],"mappings":";;;AAAA;AAAA;;AAEe,SAAS;IACtB,kCAAkC;IAClC,CAAA,GAAA,oTAAA,CAAA,WAAQ,AAAD,EAAE;AACX"}},
+    {"offset": {"line": 17, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":""}},
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}

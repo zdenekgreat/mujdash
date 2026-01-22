@@ -1,0 +1,39 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@repo/api": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@tanstack/react-query": "^5.50.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@trpc/client": "11.0.0-rc.446",
+    "@trpc/react-query": "11.0.0-rc.446",
+    "@trpc/server": "11.0.0-rc.446",
+    "ag-grid-community": "^35.0.1",
+    "ag-grid-react": "^35.0.1",
+    "lucide-react": "^0.454.0",
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.71.1",
+    "superjson": "^2.2.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.0.0-beta.9",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "4.0.0-beta.9",
+    "typescript": "^5.7.0"
+  }
+}

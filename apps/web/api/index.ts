@@ -8,19 +8,19 @@ const t = initTRPC.create({
 });
 
 export const appRouter = t.router({
-  // Získání všech uživatelů z reálné databáze
+  // 1. Procedura pro získání dat
   getUsers: t.procedure.query(async () => {
     try {
       return await db.user.findMany({
         orderBy: { createdAt: 'desc' },
       });
     } catch (error) {
-      console.error("Chyba při načítání uživatelů:", error);
+      console.error("Chyba tRPC getUsers:", error);
       return [];
     }
   }),
 
-  // Vytvoření uživatele v databázi
+  // 2. Procedura pro zápis dat (TATO CHYBĚLA V TYPECH)
   createUser: t.procedure
     .input(z.object({ 
       name: z.string().min(2), 
@@ -36,10 +36,11 @@ export const appRouter = t.router({
         });
         return user;
       } catch (error) {
-        console.error("Chyba při vytváření uživatele:", error);
-        throw new Error("Nepodařilo se vytvořit uživatele.");
+        console.error("Chyba tRPC createUser:", error);
+        throw new Error("Nepodařilo se vytvořit uživatele v databázi.");
       }
     }),
 });
 
+// Export typu pro frontend
 export type AppRouter = typeof appRouter;

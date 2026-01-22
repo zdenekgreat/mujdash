@@ -7,43 +7,50 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { trpc } from "@/lib/trpc"; // Import tRPC klienta
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Jméno musí mít alespoň 2 znaky.",
-  }),
-  email: z.string().email({
-    message: "Zadejte platný email.",
-  }),
+  username: z.string().min(2, { message: "Jméno je krátké." }),
+  email: z.string().email({ message: "Neplatný email." }),
 });
 
 export default function DashboardPage() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      email: "",
+  const utils = trpc.useUtils(); // Pro aktualizaci dat po uložení
+  
+  // 1. Dotaz na data z DB
+  const { data: users, isLoading } = trpc.getUsers.useQuery();
+
+  // 2. Mutace pro uložení do DB
+  const createUser = trpc.createUser.useMutation({
+    onSuccess: () => {
+      utils.getUsers.invalidate(); // Znovu načte seznam uživatelů po úspěchu
+      form.reset();
     },
   });
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { username: "", email: "" },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    alert(`Odesláno!\nJméno: ${values.username}\nEmail: ${values.email}`);
-    form.reset();
+    createUser.mutate({
+      name: values.username,
+      email: values.email,
+    });
   }
 
   return (
     <div className="space-y-8 w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-primary">Přehled</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-primary">Live Dashboard</h2>
       </div>
 
-      {/* GRID SYSTÉM: 1 sloupec na mobilu, 2 na tabletu, 3 na velkém desktopu */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
-        
-        {/* Formulář - zabírá na desktopu více místa (lg:col-span-2) */}
         <Card className="lg:col-span-2 shadow-sm border-border/60">
           <CardHeader>
-            <CardTitle>Rychlé přidání uživatele</CardTitle>
+            <CardTitle>Nový uživatel (Uloží se do PostgreSQL)</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -54,7 +61,7 @@ export default function DashboardPage() {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Uživatelské jméno</FormLabel>
+                        <FormLabel>Jméno</FormLabel>
                         <FormControl>
                           <Input placeholder="Jan Novák" {...field} />
                         </FormControl>
@@ -77,8 +84,9 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div className="flex justify-end pt-2">
-                  <Button type="submit" className="w-full md:w-auto px-8">
-                    Vytvořit uživatele
+                  <Button type="submit" disabled={createUser.isPending} className="w-full md:w-auto px-8">
+                    {createUser.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Uložit do databáze
                   </Button>
                 </div>
               </form>
@@ -86,14 +94,22 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Statistiky - boční panel */}
-        <Card className="shadow-sm border-border/60 bg-muted/20 border-dashed flex flex-col items-center justify-center p-8 text-center">
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg text-muted-foreground">Systémový stav</h3>
-            <p className="text-sm text-muted-foreground/80">
-              Všechny systémy běží v pořádku. Připojeno k API.
-            </p>
-          </div>
+        <Card className="shadow-sm border-border/60 bg-muted/10 p-6">
+          <h3 className="font-semibold mb-4">Poslední přidaní:</h3>
+          {isLoading ? (
+            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+          ) : (
+            <ul className="space-y-2">
+              {users?.slice(0, 5).map((user) => (
+                <li key={user.id} className="text-sm border-b pb-2">
+                  <span className="font-medium">{user.name}</span>
+                  <br />
+                  <span className="text-muted-foreground text-xs">{user.email}</span>
+                </li>
+              ))}
+              {users?.length === 0 && <li className="text-muted-foreground text-sm italic">Žádná data v DB.</li>}
+            </ul>
+          )}
         </Card>
       </div>
     </div>

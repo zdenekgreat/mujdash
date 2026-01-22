@@ -8,21 +8,17 @@ const t = initTRPC.create({
 });
 
 export const appRouter = t.router({
-  // Získání uživatelů
   getUsers: t.procedure.query(async () => {
     try {
-      const users = await db.user.findMany({
+      return await db.user.findMany({
         orderBy: { createdAt: 'desc' },
       });
-      console.log("Načteno uživatelů z DB:", users.length);
-      return users;
-    } catch (e) {
-      console.error("Chyba při getUsers:", e);
-      throw new Error("DB Error");
+    } catch (error) {
+      console.error("Database fetch error:", error);
+      return [];
     }
   }),
 
-  // Vytvoření uživatele
   createUser: t.procedure
     .input(z.object({ 
       name: z.string().min(2), 
@@ -30,17 +26,15 @@ export const appRouter = t.router({
     }))
     .mutation(async ({ input }) => {
       try {
-        const newUser = await db.user.create({
+        return await db.user.create({
           data: {
             name: input.name,
             email: input.email,
           },
         });
-        console.log("Uživatel vytvořen:", newUser.id);
-        return newUser;
-      } catch (e) {
-        console.error("Chyba při createUser:", e);
-        throw new Error("Nepodařilo se uložit uživatele.");
+      } catch (error) {
+        console.error("Database insert error:", error);
+        throw new Error("Nepodařilo se vytvořit uživatele.");
       }
     }),
 });

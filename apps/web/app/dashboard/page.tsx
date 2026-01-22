@@ -10,7 +10,7 @@ import { z } from "zod";
 import { trpc } from "@/lib/trpc";
 import { Loader2, RefreshCw } from "lucide-react";
 
-// Explicitní definice typu, aby TS v buildu mlčel
+// Definice typu pro TS build
 type UserFromDb = {
   id: string;
   name: string;
@@ -18,8 +18,8 @@ type UserFromDb = {
 };
 
 const formSchema = z.object({
-  username: z.string().min(2, "Jméno je moc krátké"),
-  email: z.string().email("Neplatný email"),
+  username: z.string().min(2, "Jméno musí mít aspoň 2 znaky"),
+  email: z.string().email("Zadej platný email"),
 });
 
 export default function DashboardPage() {
@@ -46,42 +46,40 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8 w-full p-2">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        {isFetching && <RefreshCw className="h-4 w-4 animate-spin" />}
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Moje Aplikace</h1>
+        {isFetching && <RefreshCw className="animate-spin h-5 w-5 text-gray-400" />}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
-        <Card className="lg:col-span-2">
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
           <CardHeader><CardTitle>Přidat uživatele</CardTitle></CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl><Input placeholder="Jméno" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl><Input placeholder="Email" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button type="submit" disabled={createUser.isPending}>
-                  {createUser.isPending ? "Ukládám..." : "Uložit"}
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input placeholder="Jméno" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input placeholder="Email" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={createUser.isPending}>
+                  {createUser.isPending ? "Ukládám..." : "Uložit do DB"}
                 </Button>
               </form>
             </Form>
@@ -89,17 +87,19 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Data z DB</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Seznam z Neon DB</CardTitle></CardHeader>
           <CardContent>
-            {isLoading ? <Loader2 className="animate-spin" /> : (
+            {isLoading ? (
+              <div className="flex justify-center"><Loader2 className="animate-spin" /></div>
+            ) : (
               <div className="space-y-2">
-                {/* Tady jsme přidali (u: UserFromDb), což zaručí průchod buildem */}
                 {users?.map((u: UserFromDb) => (
-                  <div key={u.id} className="text-sm border-b pb-1">
-                    <div className="font-bold">{u.name}</div>
-                    <div className="text-muted-foreground">{u.email}</div>
+                  <div key={u.id} className="p-2 border-b last:border-0">
+                    <div className="font-semibold text-sm">{u.name}</div>
+                    <div className="text-xs text-gray-500">{u.email}</div>
                   </div>
                 ))}
+                {users?.length === 0 && <p className="text-gray-400 italic text-sm text-center">Žádná data.</p>}
               </div>
             )}
           </CardContent>

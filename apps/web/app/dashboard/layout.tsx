@@ -10,10 +10,10 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    // 1. HLAVNÍ WRAPPER: Musí být w-full a min-h-screen
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    // HLAVNÍ KONTEJNER: w-full a min-h-screen jsou základ
+    <div className="flex min-h-screen w-full bg-muted/40">
       
-      {/* SIDEBAR (Desktop) */}
+      {/* DESKTOP SIDEBAR: Fixní šířka 64 (256px) */}
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-background sm:flex">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -25,24 +25,23 @@ export default function DashboardLayout({
         </nav>
       </aside>
 
-      {/* 2. OBSAHOVÁ ČÁST: Musí mít sm:pl-64 (odskok od sidebaru) a HLAVNĚ w-full */}
-      {/* !!! FIX: Přidáno w-full, aby se to roztáhlo doprava */}
-      <div className="flex flex-col sm:pl-64 w-full transition-all">
+      {/* PRAVÁ ČÁST (OBSAH): sm:pl-64 zajistí místo pro sidebar, w-full zbytek */}
+      <div className="flex flex-1 flex-col sm:pl-64 w-full min-w-0">
         
         {/* HEADER */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 w-full shrink-0">
           
-          {/* Mobilní Trigger (Hamburger) */}
+          {/* Mobilní Hamburger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
+              <Button size="icon" variant="outline" className="sm:hidden shrink-0">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+            <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+              <nav className="flex flex-col gap-4 mt-6">
+                <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
                   <span className="text-xl font-bold">Enterprise App</span>
                 </Link>
                 <NavLinks />
@@ -50,27 +49,26 @@ export default function DashboardLayout({
             </SheetContent>
           </Sheet>
 
-          {/* Horní lišta */}
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-4 flex-1"> 
-               {/* flex-1 zajistí, že searchbar využije místo */}
-               <h1 className="text-lg font-semibold hidden md:block shrink-0">Dashboard</h1>
-               <div className="w-full max-w-xl"> {/* Omezíme šířku hledání, ale ne layoutu */}
-                 <SearchCommand />
-               </div>
+          {/* Vyhledávání a uživatel */}
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex-1 max-w-2xl"> 
+               <SearchCommand />
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <span className="text-sm text-muted-foreground hidden md:block">admin@firma.cz</span>
-              <LogOut className="h-5 w-5 text-muted-foreground cursor-pointer" />
+              <span className="text-sm text-muted-foreground hidden md:block font-medium">
+                admin@firma.cz
+              </span>
+              <LogOut className="h-5 w-5 text-muted-foreground cursor-pointer hover:text-primary transition-colors" />
             </div>
           </div>
         </header>
         
-        {/* 3. MAIN OBSAH: Tady byl problém. */}
-        {/* !!! FIX: Odstraněn 'grid', 'items-start'. Přidáno 'flex-1', 'w-full'. */}
-        <main className="flex-1 space-y-4 p-4 sm:px-6 sm:py-0 w-full">
-          {children}
+        {/* MAIN AREA: w-full a flex-1 zajistí roztažení */}
+        <main className="flex-1 w-full p-4 md:p-8">
+          <div className="mx-auto w-full max-w-[1600px]"> {/* Max šířka pro velmi široké monitory, aby se to dalo číst */}
+            {children}
+          </div>
         </main>
       </div>
     </div>

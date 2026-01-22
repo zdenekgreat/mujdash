@@ -8,19 +8,21 @@ const t = initTRPC.create({
 });
 
 export const appRouter = t.router({
-  // 1. Procedura pro získání dat
+  // Získání uživatelů
   getUsers: t.procedure.query(async () => {
     try {
-      return await db.user.findMany({
+      const users = await db.user.findMany({
         orderBy: { createdAt: 'desc' },
       });
-    } catch (error) {
-      console.error("Chyba tRPC getUsers:", error);
-      return [];
+      console.log("Načteno uživatelů z DB:", users.length);
+      return users;
+    } catch (e) {
+      console.error("Chyba při getUsers:", e);
+      throw new Error("DB Error");
     }
   }),
 
-  // 2. Procedura pro zápis dat (TATO CHYBĚLA V TYPECH)
+  // Vytvoření uživatele
   createUser: t.procedure
     .input(z.object({ 
       name: z.string().min(2), 
@@ -28,19 +30,19 @@ export const appRouter = t.router({
     }))
     .mutation(async ({ input }) => {
       try {
-        const user = await db.user.create({
+        const newUser = await db.user.create({
           data: {
             name: input.name,
             email: input.email,
           },
         });
-        return user;
-      } catch (error) {
-        console.error("Chyba tRPC createUser:", error);
-        throw new Error("Nepodařilo se vytvořit uživatele v databázi.");
+        console.log("Uživatel vytvořen:", newUser.id);
+        return newUser;
+      } catch (e) {
+        console.error("Chyba při createUser:", e);
+        throw new Error("Nepodařilo se uložit uživatele.");
       }
     }),
 });
 
-// Export typu pro frontend
 export type AppRouter = typeof appRouter;

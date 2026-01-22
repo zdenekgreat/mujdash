@@ -1,16 +1,13 @@
 "use client";
 
 import { AgGridReact } from 'ag-grid-react';
-import { useState } from 'react';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
-// 1. NOVÉ IMPORTY PRO v33+ (Žádné CSS soubory!)
-import { 
-  ModuleRegistry, 
-  AllCommunityModule, 
-  themeQuartz // <--- Nový způsob stylování
-} from 'ag-grid-community'; 
+// 1. POVINNÉ IMPORTY STYLŮ (Legacy mode - nejspolehlivější)
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 
-// 2. Registrace modulů
+// Registrace modulů
 ModuleRegistry.registerModules([ AllCommunityModule ]);
 
 interface HeavyTableProps {
@@ -20,14 +17,18 @@ interface HeavyTableProps {
 
 export const HeavyTable = ({ rowData, columnDefs }: HeavyTableProps) => {
   return (
-    // Zde už NEMUSÍ BÝT class "ag-theme-quartz", stačí jen rozměry
-    <div className="h-[500px] w-full font-sans">
+    // 2. OPRAVA: Použijeme "style" pro výšku a šířku.
+    // Třída "ag-theme-quartz" zajistí vzhled.
+    <div 
+      className="ag-theme-quartz" 
+      style={{ height: '500px', width: '100%' }}
+    >
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
         
-        // 3. PŘEDÁNÍ TÉMATU PŘES PROP
-        theme={themeQuartz}
+        // 3. DŮLEŽITÉ: Zde NEPOSÍLÁME 'theme={...}'
+        // Necháme to na CSS třídě nahoře, to funguje vždy.
 
         pagination={true}
         paginationPageSize={20}
